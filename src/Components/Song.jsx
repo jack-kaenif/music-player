@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 
-const Song = ({ song, index, isCurrentSong, onSelect, onRemove }) => {
+export const Song = ({ song, index, isCurrentSong, onSelect, onRemove }) => {
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -36,5 +36,3 @@ const Song = ({ song, index, isCurrentSong, onSelect, onRemove }) => {
     </div>
   );
 };
-
-export default Song;

@@ -1,7 +1,7 @@
 import React from 'react';
 import Song from './Song.jsx';
 
-const SongContainer = ({ 
+export const SongContainer = ({ 
   songs, 
   setSongs, 
   currentSongIndex, 
@@ -47,5 +47,3 @@ const SongContainer = ({
     </div>
   );
 };
-
-export default SongContainer;

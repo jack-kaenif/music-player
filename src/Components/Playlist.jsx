@@ -2,7 +2,7 @@ import React from 'react';
 import { SortAsc, SortDesc, Trash2 } from 'lucide-react';
 import SongContainer from './SongContainer.jsx';
 
-const Playlist = ({ 
+export const Playlist = ({ 
   songs, 
   setSongs, 
   currentSongIndex, 
@@ -67,5 +67,3 @@ const Playlist = ({
     </div>
   );
 };
-
-export default Playlist;

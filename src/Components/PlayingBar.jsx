@@ -1,7 +1,7 @@
 import React from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 
-const PlayingBar = ({ 
+export const PlayingBar = ({ 
   currentTime, 
   duration, 
   volume, 
@@ -115,5 +115,3 @@ const PlayingBar = ({
     </div>
   );
 };
-
-export default PlayingBar;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ShowSong = ({ currentSong }) => {
+export const ShowSong = ({ currentSong }) => {
   return (
     <div className="text-center">
       {currentSong ? (

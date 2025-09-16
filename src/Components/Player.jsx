@@ -2,7 +2,7 @@ import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat } from 'lucide-react';
 import ShowSong from './ShowSong.jsx';
 
-const Player = ({ 
+export const Player = ({ 
   currentSong, 
   isPlaying, 
   setIsPlaying, 
@@ -91,5 +91,3 @@ const Player = ({
     </div>
   );
 };
-
-export default Player;

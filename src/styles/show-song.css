@@ -1,0 +1,42 @@
+.show-song-container {
+  text-align: center;
+}
+
+.song-artwork {
+  width: 12rem;
+  height: 12rem;
+  background: linear-gradient(135deg, #f9a8d4, #8b5cf6);
+  border-radius: 50%;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.song-artwork-inner {
+  width: 8rem;
+  height: 8rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.song-artwork.no-song {
+  background: #4b5563;
+}
+
+.song-title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.song-artist {
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+}

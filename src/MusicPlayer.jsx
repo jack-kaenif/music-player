@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Upload, Trash2 } from 'lucide-react';
-import Playlist from './Playlist.jsx';
-import Player from './Player.jsx';
-import PlayingBar from './PlayingBar.jsx';
+import { Playlist } from './Playlist.jsx';
+import { Player } from './Player.jsx'; 
+import { PlayingBar } from './PlayingBar.jsx';
 
-const MusicPlayer = () => {
+export const MusicPlayer = () => {
   // Estados principales
   const [songs, setSongs] = useState([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
