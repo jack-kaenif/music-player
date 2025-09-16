@@ -1,6 +1,6 @@
 import React from 'react';
 import { SortAsc, SortDesc, Trash2 } from 'lucide-react';
-import SongContainer from './SongContainer.jsx';
+import { SongContainer } from './SongContainer.jsx';
 
 export const Playlist = ({ 
   songs, 

@@ -1,5 +1,5 @@
 import React from 'react';
-import Song from './Song.jsx';
+import { Song } from './Song.jsx';
 
 export const SongContainer = ({ 
   songs, 

@@ -1,6 +1,8 @@
-import { Playlist } from './Playlist.jsx';
-import { Player } from './Player.jsx'; 
-import { PlayingBar } from './PlayingBar.jsx';
+import React, { useState, useRef, useEffect } from 'react';
+import { Playlist } from './Components/Playlist.jsx';
+import { Player } from './Components/Player.jsx'; 
+import { PlayingBar } from './Components/PlayingBar.jsx';
+import { Upload } from 'lucide-react';
 
 export const MusicPlayer = () => {
   // Estados principales
