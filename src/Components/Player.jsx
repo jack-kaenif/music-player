@@ -2,6 +2,49 @@ import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat } from 'lucide-react';
 import ShowSong from './ShowSong.jsx';
 
+const playerStyles = {
+  container: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '1.5rem',
+    padding: '2rem',
+    marginBottom: '1.5rem',
+  },
+  controls: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '1.5rem',
+    marginBottom: '1.5rem',
+  },
+  button: {
+    padding: '0.75rem',
+    borderRadius: '0.5rem',
+    transition: 'background-color 0.3s',
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: 'white',
+    cursor: 'pointer',
+  },
+  mainButton: {
+    padding: '1rem',
+    borderRadius: '9999px',
+    background: 'linear-gradient(to right, #e56291, #8c52ff)',
+    transition: 'all 0.3s',
+    border: 'none',
+    color: 'white',
+    cursor: 'pointer',
+  },
+  buttonDisabled: {
+    opacity: '0.5',
+    cursor: 'not-allowed',
+  },
+  shuffleActive: {
+    backgroundColor: '#e56291',
+    color: 'white',
+  },
+};
+
 export const Player = ({ 
   currentSong, 
   isPlaying, 
@@ -18,14 +61,6 @@ export const Player = ({
 }) => {
   const togglePlayPause = () => {
     if (!audioRef.current || songs.length === 0) return;
-    
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(error => {
-        setErrors(prev => [...prev, 'Error playing audio: ' + error.message]);
-      });
-    }
     setIsPlaying(!isPlaying);
   };
 
@@ -38,16 +73,13 @@ export const Player = ({
   };
 
   return (
-    <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 mb-6">
+    <div style={playerStyles.container}>
       <ShowSong currentSong={currentSong} />
       
-      {/* Controls */}
-      <div className="flex items-center justify-center gap-6 mb-6">
+      <div style={playerStyles.controls}>
         <button
           onClick={toggleShuffle}
-          className={`p-2 rounded-lg transition-colors ${
-            shuffle ? 'bg-pink-500 text-white' : 'hover:bg-white/10'
-          }`}
+          style={{ ...playerStyles.button, ...(shuffle && playerStyles.shuffleActive) }}
           title="Shuffle"
         >
           <Shuffle size={20} />
@@ -56,7 +88,7 @@ export const Player = ({
         <button
           onClick={handlePrevious}
           disabled={songs.length === 0}
-          className="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+          style={{ ...playerStyles.button, ...(songs.length === 0 && playerStyles.buttonDisabled) }}
         >
           <SkipBack size={24} />
         </button>
@@ -64,7 +96,7 @@ export const Player = ({
         <button
           onClick={togglePlayPause}
           disabled={songs.length === 0}
-          className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 p-4 rounded-full transition-all duration-300"
+          style={{ ...playerStyles.mainButton, ...(songs.length === 0 && playerStyles.buttonDisabled) }}
         >
           {isPlaying ? <Pause size={28} /> : <Play size={28} />}
         </button>
@@ -72,20 +104,18 @@ export const Player = ({
         <button
           onClick={handleNext}
           disabled={songs.length === 0}
-          className="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+          style={{ ...playerStyles.button, ...(songs.length === 0 && playerStyles.buttonDisabled) }}
         >
           <SkipForward size={24} />
         </button>
         
         <button
           onClick={toggleRepeat}
-          className={`p-2 rounded-lg transition-colors ${
-            repeat > 0 ? 'bg-pink-500 text-white' : 'hover:bg-white/10'
-          }`}
+          style={{ ...playerStyles.button, ...(repeat > 0 && playerStyles.shuffleActive) }}
           title={repeat === 0 ? 'No repeat' : repeat === 1 ? 'Repeat one' : 'Repeat all'}
         >
           <Repeat size={20} />
-          {repeat === 1 && <span className="text-xs absolute -mt-2 -mr-2">1</span>}
+          {repeat === 1 && <span style={{ fontSize: '0.75rem', position: 'absolute', top: '-0.5rem', right: '-0.5rem' }}>1</span>}
         </button>
       </div>
     </div>

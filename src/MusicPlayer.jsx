@@ -1,11 +1,93 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Playlist } from './Components/Playlist.jsx';
 import { Player } from './Components/Player.jsx'; 
 import { PlayingBar } from './Components/PlayingBar.jsx';
 import { Upload } from 'lucide-react';
 
+const musicPlayerStyles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(to bottom right, #2b0c41, #360a3a)',
+    color: '#fff',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '2rem 1rem',
+  },
+  mainContent: {
+    width: '100%',
+    maxWidth: '1200px',
+    margin: '0 auto',
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: '2rem',
+  },
+  title: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    marginBottom: '1rem',
+    backgroundImage: 'linear-gradient(to right, #e56291, #8c52ff)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+  },
+  uploadSection: {
+    marginBottom: '1.5rem',
+  },
+  uploadButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    margin: '0 auto',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '9999px',
+    fontWeight: '600',
+    backgroundImage: 'linear-gradient(to right, #e56291, #8c52ff)',
+    transition: 'all 0.3s ease',
+    border: 'none',
+    color: '#fff',
+    cursor: 'pointer',
+    opacity: 1,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+  },
+  errorBox: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    border: '1px solid rgba(239, 68, 68, 0.5)',
+    borderRadius: '0.5rem',
+    padding: '1rem',
+    marginBottom: '1rem',
+  },
+  errorText: {
+    color: '#fca5a5',
+    fontSize: '0.875rem',
+  },
+  errorButton: {
+    background: 'none',
+    border: 'none',
+    color: '#fca5a5',
+    cursor: 'pointer',
+    fontSize: '0.75rem',
+    marginTop: '0.5rem',
+    textDecoration: 'underline',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    gap: '2rem',
+  },
+};
+
+const mediaQueryLg = '@media (min-width: 1024px)';
+musicPlayerStyles.grid[mediaQueryLg] = {
+  gridTemplateColumns: 'repeat(3, 1fr)',
+};
+
 export const MusicPlayer = () => {
-  // Estados principales
   const [songs, setSongs] = useState([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -15,40 +97,113 @@ export const MusicPlayer = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState([]);
-
-  // Estados avanzados
   const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState(0); // 0: no repeat, 1: repeat one, 2: repeat all
-  const [sortOrder, setSortOrder] = useState('none'); // 'none', 'asc', 'desc'
-
-  // Referencias
+  const [repeat, setRepeat] = useState(0);
+  const [sortOrder, setSortOrder] = useState('none');
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Cargar datos del localStorage al montar
-  useEffect(() => {
-    const savedSongs = localStorage.getItem('musicPlayer_songs');
-    const savedVolume = localStorage.getItem('musicPlayer_volume');
-    const savedCurrentSong = localStorage.getItem('musicPlayer_currentSong');
+  const handleNext = useCallback(() => {
+    if (songs.length === 0) return;
+    let nextIndex;
+    if (shuffle) {
+      do {
+        nextIndex = Math.floor(Math.random() * songs.length);
+      } while (nextIndex === currentSongIndex && songs.length > 1);
+    } else {
+      nextIndex = (currentSongIndex + 1) % songs.length;
+    }
+    setCurrentSongIndex(nextIndex);
+  }, [songs, currentSongIndex, shuffle]);
 
-    if (savedSongs) {
-      try {
-        setSongs(JSON.parse(savedSongs));
-      } catch (error) {
-        console.error('Error loading saved songs:', error);
+  const handlePrevious = useCallback(() => {
+    if (songs.length === 0) return;
+    let prevIndex;
+    if (shuffle) {
+      do {
+        prevIndex = Math.floor(Math.random() * songs.length);
+      } while (prevIndex === currentSongIndex && songs.length > 1);
+    } else {
+      prevIndex = currentSongIndex === 0 ? songs.length - 1 : currentSongIndex - 1;
+    }
+    setCurrentSongIndex(prevIndex);
+  }, [songs, currentSongIndex, shuffle]);
+
+  const clearPlaylist = useCallback(() => {
+    songs.forEach(song => {
+      if (song.url) {
+        URL.revokeObjectURL(song.url);
+      }
+    });
+    setSongs([]);
+    setCurrentSongIndex(0);
+    setIsPlaying(false);
+    localStorage.removeItem('musicPlayer_songs');
+  }, [songs, setCurrentSongIndex, setIsPlaying, setSongs]);
+
+  const validateAudioFile = useCallback((file) => {
+    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/m4a'];
+    const validExtensions = ['.mp3', '.wav', '.ogg', '.m4a'];
+    const fileName = file.name.toLowerCase();
+    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    const hasValidType = validTypes.includes(file.type);
+    return hasValidExtension || hasValidType;
+  }, []);
+
+  const handleFileUpload = useCallback(async (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+    setIsLoading(true);
+    setErrors([]);
+    const newSongs = [];
+    const invalidFiles = [];
+
+    for (const file of files) {
+      if (validateAudioFile(file)) {
+        const url = URL.createObjectURL(file);
+        
+        let artist = 'Unknown Artist';
+        let title = file.name.replace(/\.[^/.]+$/, "");
+        const parts = file.name.split(' - ');
+        
+        if (parts.length > 1) {
+            artist = parts[0];
+            title = parts.slice(1).join(' - ').replace(/\.[^/.]+$/, "");
+        }
+
+        newSongs.push({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: url,
+          file: file,
+          artist: artist,
+          title: title
+        });
+      } else {
+        invalidFiles.push(file.name);
       }
     }
 
+    if (invalidFiles.length > 0) {
+      setErrors([`Invalid audio files: ${invalidFiles.join(', ')}`]);
+    }
+    
+    setSongs(prev => [...prev, ...newSongs]);
+    setIsLoading(false);
+    event.target.value = '';
+  }, [setSongs, setIsLoading, setErrors, validateAudioFile]);
+
+  useEffect(() => {
+    localStorage.removeItem('musicPlayer_songs');
+    console.log('Se limpiaron las canciones de la sesión anterior.');
+
+    const savedVolume = localStorage.getItem('musicPlayer_volume');
     if (savedVolume) {
       setVolume(parseInt(savedVolume));
     }
-
-    if (savedCurrentSong) {
-      setCurrentSongIndex(parseInt(savedCurrentSong));
-    }
   }, []);
 
-  // Guardar en localStorage cuando cambian las canciones
   useEffect(() => {
     if (songs.length > 0) {
       localStorage.setItem('musicPlayer_songs', JSON.stringify(songs.map(song => ({
@@ -59,7 +214,6 @@ export const MusicPlayer = () => {
     }
   }, [songs]);
 
-  // Guardar configuración en localStorage
   useEffect(() => {
     localStorage.setItem('musicPlayer_volume', volume.toString());
   }, [volume]);
@@ -68,11 +222,26 @@ export const MusicPlayer = () => {
     localStorage.setItem('musicPlayer_currentSong', currentSongIndex.toString());
   }, [currentSongIndex]);
 
-  // Nuevo useEffect para controlar play/pause basado en el estado
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || songs.length === 0) return;
+    const newSong = songs[currentSongIndex];
+    if (audio.src !== newSong.url) {
+      audio.src = newSong.url;
+      audio.load();
+    }
+    // Lógica nueva: Si el reproductor estaba en estado de "reproduciendo"
+    // al cambiar de canción, la nueva debe iniciar automáticamente.
+    if (isPlaying) {
+      audio.play().catch(error => {
+        setErrors(prev => [...prev, 'Error playing audio: ' + error.message]);
+      });
+    }
+  }, [currentSongIndex, songs]); // Agrega `isPlaying` a las dependencias si quieres que se dispare al cambiar de estado también.
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-
     if (isPlaying) {
       audio.play().catch(error => {
         setErrors(prev => [...prev, 'Error playing audio: ' + error.message]);
@@ -82,32 +251,15 @@ export const MusicPlayer = () => {
     }
   }, [isPlaying]);
 
-  // Configurar audio cuando cambia la canción
-  useEffect(() => {
-    if (audioRef.current && songs[currentSongIndex]) {
-      audioRef.current.volume = isMuted ? 0 : volume / 100;
-      audioRef.current.load();
-      // Si la canción estaba sonando, se inicia la reproducción de la nueva.
-      if (isPlaying) {
-        audioRef.current.play().catch(error => {
-          setErrors(prev => [...prev, 'Error playing audio: ' + error.message]);
-        });
-      }
-    }
-  }, [currentSongIndex, songs, isPlaying]);
-
-  // Actualizar volumen
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume / 100;
     }
   }, [volume, isMuted]);
 
-  // Event listeners del audio
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-
     const updateTime = () => setCurrentTime(audio.currentTime);
     const updateDuration = () => setDuration(audio.duration || 0);
     const handleEnded = () => {
@@ -120,7 +272,6 @@ export const MusicPlayer = () => {
         setIsPlaying(false);
       }
     };
-
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('loadedmetadata', updateDuration);
     audio.addEventListener('ended', handleEnded);
@@ -128,108 +279,14 @@ export const MusicPlayer = () => {
       setErrors(prev => [...prev, `Error playing song: ${e.message}`]);
       setIsPlaying(false);
     });
-
     return () => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleEnded);
     };
-  }, [currentSongIndex, repeat, songs.length]);
+  }, [currentSongIndex, repeat, songs.length, handleNext, setIsPlaying]);
 
-  // Funciones de utilidad
-  const validateAudioFile = (file) => {
-    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/m4a'];
-    const validExtensions = ['.mp3', '.wav', '.ogg', '.m4a'];
-    const fileName = file.name.toLowerCase();
-    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
-    const hasValidType = validTypes.includes(file.type);
-
-    return hasValidExtension || hasValidType;
-  };
-
-  // Handlers de archivos
-  const handleFileUpload = async (event) => {
-    const files = Array.from(event.target.files);
-    if (files.length === 0) return;
-
-    setIsLoading(true);
-    setErrors([]);
-
-    const validFiles = [];
-    const invalidFiles = [];
-
-    for (const file of files) {
-      if (validateAudioFile(file)) {
-        const url = URL.createObjectURL(file);
-        validFiles.push({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: url,
-          file: file
-        });
-      } else {
-        invalidFiles.push(file.name);
-      }
-    }
-
-    if (invalidFiles.length > 0) {
-      setErrors([`Invalid audio files: ${invalidFiles.join(', ')}`]);
-    }
-
-    setSongs(prev => [...prev, ...validFiles]);
-    setIsLoading(false);
-
-    event.target.value = '';
-  };
-
-  // Handlers de reproducción
-  const handleNext = () => {
-    if (songs.length === 0) return;
-
-    let nextIndex;
-    if (shuffle) {
-      do {
-        nextIndex = Math.floor(Math.random() * songs.length);
-      } while (nextIndex === currentSongIndex && songs.length > 1);
-    } else {
-      nextIndex = (currentSongIndex + 1) % songs.length;
-    }
-
-    setCurrentSongIndex(nextIndex);
-    //setIsPlaying(false); // No se necesita, la carga de la nueva canción ya lo maneja
-  };
-
-  const handlePrevious = () => {
-    if (songs.length === 0) return;
-
-    let prevIndex;
-    if (shuffle) {
-      do {
-        prevIndex = Math.floor(Math.random() * songs.length);
-      } while (prevIndex === currentSongIndex && songs.length > 1);
-    } else {
-      prevIndex = currentSongIndex === 0 ? songs.length - 1 : currentSongIndex - 1;
-    }
-
-    setCurrentSongIndex(prevIndex);
-    //setIsPlaying(false); // No se necesita, la carga de la nueva canción ya lo maneja
-  };
-
-  const clearPlaylist = () => {
-    songs.forEach(song => {
-      if (song.url) {
-        URL.revokeObjectURL(song.url);
-      }
-    });
-    setSongs([]);
-    setCurrentSongIndex(0);
-    setIsPlaying(false);
-    localStorage.removeItem('musicPlayer_songs');
-  };
-
-  // Cleanup al desmontar
   useEffect(() => {
     return () => {
       songs.forEach(song => {
@@ -238,58 +295,46 @@ export const MusicPlayer = () => {
         }
       });
     };
-  }, []);
+  }, [songs]);
 
   const currentSong = songs[currentSongIndex];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 text-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-purple-300 bg-clip-text text-transparent">
-            Music Player
-          </h1>
-
-          {/* Upload Section */}
-          <div className="mb-6">
+    <div style={musicPlayerStyles.container}>
+      <div style={musicPlayerStyles.mainContent}>
+        <div style={musicPlayerStyles.header}>
+          <h1 style={musicPlayerStyles.title}>Music Player</h1>
+          <div style={musicPlayerStyles.uploadSection}>
             <input
               ref={fileInputRef}
               type="file"
               multiple
               accept=".mp3,.wav,.ogg,.m4a,audio/*"
               onChange={handleFileUpload}
-              className="hidden"
+              style={{ display: 'none' }}
             />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 px-6 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 mx-auto"
+              style={isLoading ? {...musicPlayerStyles.uploadButton, ...musicPlayerStyles.buttonDisabled} : musicPlayerStyles.uploadButton}
             >
               <Upload size={20} />
               {isLoading ? 'Loading...' : 'Upload Songs'}
             </button>
           </div>
-
-          {/* Error Messages */}
           {errors.length > 0 && (
-            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-4">
+            <div style={musicPlayerStyles.errorBox}>
               {errors.map((error, index) => (
-                <p key={index} className="text-red-300 text-sm">{error}</p>
+                <p key={index} style={musicPlayerStyles.errorText}>{error}</p>
               ))}
-              <button
-                onClick={() => setErrors([])}
-                className="text-red-300 hover:text-white text-xs mt-2"
-              >
+              <button onClick={() => setErrors([])} style={musicPlayerStyles.errorButton}>
                 Clear errors
               </button>
             </div>
           )}
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Playlist Component */}
-          <div className="lg:col-span-1">
+        <div style={musicPlayerStyles.grid}>
+          <div style={{ '@media (min-width: 1024px)': { gridColumn: 'span 1' } }}>
             <Playlist 
               songs={songs}
               setSongs={setSongs}
@@ -301,9 +346,7 @@ export const MusicPlayer = () => {
               setSortOrder={setSortOrder}
             />
           </div>
-
-          {/* Player Component */}
-          <div className="lg:col-span-2">
+          <div style={{ '@media (min-width: 1024px)': { gridColumn: 'span 2' } }}>
             <Player 
               currentSong={currentSong}
               isPlaying={isPlaying}
@@ -318,7 +361,6 @@ export const MusicPlayer = () => {
               audioRef={audioRef}
               setErrors={setErrors}
             />
-
             <PlayingBar 
               currentTime={currentTime}
               duration={duration}
@@ -328,12 +370,9 @@ export const MusicPlayer = () => {
               setIsMuted={setIsMuted}
               audioRef={audioRef}
               setCurrentTime={setCurrentTime}
-              currentSong={currentSong}
             />
           </div>
         </div>
-
-        {/* Hidden Audio Element */}
         {currentSong && (
           <audio
             ref={audioRef}

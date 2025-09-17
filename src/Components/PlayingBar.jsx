@@ -1,5 +1,38 @@
 import React from 'react';
 
+const playingBarStyles = {
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    marginTop: '1.5rem',
+  },
+  time: {
+    fontSize: '0.875rem',
+    fontFamily: 'monospace',
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  seekBar: {
+    width: '100%',
+    height: '0.25rem',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: '9999px',
+    cursor: 'pointer',
+  },
+  volumeContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  volumeSlider: {
+    width: '6rem',
+    height: '0.25rem',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: '9999px',
+    cursor: 'pointer',
+  },
+};
+
 export const PlayingBar = ({ 
   currentTime, 
   duration, 
@@ -46,26 +79,19 @@ export const PlayingBar = ({
   };
 
   return (
-    <div className="flex items-center gap-4 mt-6">
-      {/* Time and duration display */}
-      <span className="text-sm font-mono text-white/70">{formatTime(currentTime)}</span>
-
-      {/* Seek bar */}
+    <div style={playingBarStyles.container}>
+      <span style={playingBarStyles.time}>{formatTime(currentTime)}</span>
       <input
         type="range"
         min="0"
         max={duration || 0}
         value={currentTime}
         onChange={handleSeek}
-        className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+        style={playingBarStyles.seekBar}
       />
-
-      {/* Duration display */}
-      <span className="text-sm font-mono text-white/70">{formatTime(duration)}</span>
-
-      {/* Volume controls */}
-      <div className="flex items-center gap-2">
-        <button onClick={handleToggleMute}>
+      <span style={playingBarStyles.time}>{formatTime(duration)}</span>
+      <div style={playingBarStyles.volumeContainer}>
+        <button onClick={handleToggleMute} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
           {isMuted ? '🔇' : '🔊'}
         </button>
         <input
@@ -74,7 +100,7 @@ export const PlayingBar = ({
           max="100"
           value={isMuted ? 0 : volume}
           onChange={handleVolumeChange}
-          className="w-24 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+          style={playingBarStyles.volumeSlider}
         />
       </div>
     </div>

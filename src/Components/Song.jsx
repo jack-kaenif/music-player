@@ -1,6 +1,55 @@
 import React from 'react';
 import { X } from 'lucide-react';
 
+const songStyles = {
+  item: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem',
+    borderRadius: '0.5rem',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  current: {
+    background: 'linear-gradient(to right, rgba(229, 98, 145, 0.3), rgba(140, 82, 255, 0.3))',
+    border: '1px solid rgba(229, 98, 145, 0.5)',
+  },
+  thumbnail: {
+    width: '2.5rem',
+    height: '2.5rem',
+    background: 'linear-gradient(to bottom right, #e56291, #8c52ff)',
+    borderRadius: '9999px',
+    flexShrink: '0',
+  },
+  info: {
+    flex: '1',
+    minWidth: '0',
+  },
+  name: {
+    fontWeight: '500',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  size: {
+    fontSize: '0.875rem',
+    color: '#a0aec0',
+  },
+  removeButton: {
+    padding: '0.25rem',
+    borderRadius: '0.25rem',
+    background: 'none',
+    border: 'none',
+    color: '#f87171',
+    cursor: 'pointer',
+    opacity: '0',
+    transition: 'opacity 0.2s',
+  },
+};
+
 export const Song = ({ song, index, isCurrentSong, onSelect, onRemove }) => {
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -12,24 +61,22 @@ export const Song = ({ song, index, isCurrentSong, onSelect, onRemove }) => {
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 group ${
-        isCurrentSong 
-          ? 'bg-gradient-to-r from-pink-500/30 to-purple-500/30 border border-pink-500/50' 
-          : 'hover:bg-white/10'
-      }`}
+      style={isCurrentSong ? { ...songStyles.item, ...songStyles.current } : songStyles.item}
       onClick={onSelect}
+      onMouseEnter={(e) => e.currentTarget.querySelector('button').style.opacity = '1'}
+      onMouseLeave={(e) => e.currentTarget.querySelector('button').style.opacity = '0'}
     >
-      <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex-shrink-0"></div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium truncate">{song.name.replace(/\.[^/.]+$/, "")}</p>
-        <p className="text-sm text-gray-400">{formatFileSize(song.size)}</p>
+      <div style={songStyles.thumbnail}></div>
+      <div style={songStyles.info}>
+        <p style={songStyles.name}>{song.name.replace(/\.[^/.]+$/, "")}</p>
+        <p style={songStyles.size}>{formatFileSize(song.size)}</p>
       </div>
       <button
         onClick={(e) => {
           e.stopPropagation();
           onRemove();
         }}
-        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded text-red-400 transition-all"
+        style={songStyles.removeButton}
       >
         <X size={16} />
       </button>

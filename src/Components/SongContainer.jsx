@@ -1,6 +1,16 @@
 import React from 'react';
 import { Song } from './Song.jsx';
 
+const songContainerStyles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+    maxHeight: '24rem',
+    overflowY: 'auto',
+  },
+};
+
 export const SongContainer = ({ 
   songs, 
   setSongs, 
@@ -10,7 +20,6 @@ export const SongContainer = ({
 }) => {
   const selectSong = (index) => {
     setCurrentSongIndex(index);
-    setIsPlaying(false);
   };
   
   const removeSong = (index) => {
@@ -18,10 +27,8 @@ export const SongContainer = ({
     if (songToRemove.url) {
       URL.revokeObjectURL(songToRemove.url);
     }
-    
     const newSongs = songs.filter((_, i) => i !== index);
     setSongs(newSongs);
-    
     if (index === currentSongIndex && newSongs.length > 0) {
       setCurrentSongIndex(Math.min(currentSongIndex, newSongs.length - 1));
     } else if (index < currentSongIndex) {
@@ -33,7 +40,7 @@ export const SongContainer = ({
   };
 
   return (
-    <div className="space-y-2 max-h-96 overflow-y-auto">
+    <div style={songContainerStyles.container}>
       {songs.map((song, index) => (
         <Song 
           key={index}
