@@ -15,22 +15,22 @@ export const MusicPlayer = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState([]);
-  
+
   // Estados avanzados
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(0); // 0: no repeat, 1: repeat one, 2: repeat all
   const [sortOrder, setSortOrder] = useState('none'); // 'none', 'asc', 'desc'
-  
+
   // Referencias
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
-  
+
   // Cargar datos del localStorage al montar
   useEffect(() => {
     const savedSongs = localStorage.getItem('musicPlayer_songs');
     const savedVolume = localStorage.getItem('musicPlayer_volume');
     const savedCurrentSong = localStorage.getItem('musicPlayer_currentSong');
-    
+
     if (savedSongs) {
       try {
         setSongs(JSON.parse(savedSongs));
@@ -38,16 +38,16 @@ export const MusicPlayer = () => {
         console.error('Error loading saved songs:', error);
       }
     }
-    
+
     if (savedVolume) {
       setVolume(parseInt(savedVolume));
     }
-    
+
     if (savedCurrentSong) {
       setCurrentSongIndex(parseInt(savedCurrentSong));
     }
   }, []);
-  
+
   // Guardar en localStorage cuando cambian las canciones
   useEffect(() => {
     if (songs.length > 0) {
@@ -58,36 +58,56 @@ export const MusicPlayer = () => {
       }))));
     }
   }, [songs]);
-  
+
   // Guardar configuración en localStorage
   useEffect(() => {
     localStorage.setItem('musicPlayer_volume', volume.toString());
   }, [volume]);
-  
+
   useEffect(() => {
     localStorage.setItem('musicPlayer_currentSong', currentSongIndex.toString());
   }, [currentSongIndex]);
-  
+
+  // Nuevo useEffect para controlar play/pause basado en el estado
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.play().catch(error => {
+        setErrors(prev => [...prev, 'Error playing audio: ' + error.message]);
+      });
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying]);
+
   // Configurar audio cuando cambia la canción
   useEffect(() => {
     if (audioRef.current && songs[currentSongIndex]) {
       audioRef.current.volume = isMuted ? 0 : volume / 100;
       audioRef.current.load();
+      // Si la canción estaba sonando, se inicia la reproducción de la nueva.
+      if (isPlaying) {
+        audioRef.current.play().catch(error => {
+          setErrors(prev => [...prev, 'Error playing audio: ' + error.message]);
+        });
+      }
     }
-  }, [currentSongIndex, songs]);
-  
+  }, [currentSongIndex, songs, isPlaying]);
+
   // Actualizar volumen
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume / 100;
     }
   }, [volume, isMuted]);
-  
+
   // Event listeners del audio
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    
+
     const updateTime = () => setCurrentTime(audio.currentTime);
     const updateDuration = () => setDuration(audio.duration || 0);
     const handleEnded = () => {
@@ -100,7 +120,7 @@ export const MusicPlayer = () => {
         setIsPlaying(false);
       }
     };
-    
+
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('loadedmetadata', updateDuration);
     audio.addEventListener('ended', handleEnded);
@@ -108,7 +128,7 @@ export const MusicPlayer = () => {
       setErrors(prev => [...prev, `Error playing song: ${e.message}`]);
       setIsPlaying(false);
     });
-    
+
     return () => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
@@ -116,7 +136,7 @@ export const MusicPlayer = () => {
       audio.removeEventListener('error', handleEnded);
     };
   }, [currentSongIndex, repeat, songs.length]);
-  
+
   // Funciones de utilidad
   const validateAudioFile = (file) => {
     const validTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/m4a'];
@@ -124,21 +144,21 @@ export const MusicPlayer = () => {
     const fileName = file.name.toLowerCase();
     const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
     const hasValidType = validTypes.includes(file.type);
-    
+
     return hasValidExtension || hasValidType;
   };
-  
+
   // Handlers de archivos
   const handleFileUpload = async (event) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
-    
+
     setIsLoading(true);
     setErrors([]);
-    
+
     const validFiles = [];
     const invalidFiles = [];
-    
+
     for (const file of files) {
       if (validateAudioFile(file)) {
         const url = URL.createObjectURL(file);
@@ -153,21 +173,21 @@ export const MusicPlayer = () => {
         invalidFiles.push(file.name);
       }
     }
-    
+
     if (invalidFiles.length > 0) {
       setErrors([`Invalid audio files: ${invalidFiles.join(', ')}`]);
     }
-    
+
     setSongs(prev => [...prev, ...validFiles]);
     setIsLoading(false);
-    
+
     event.target.value = '';
   };
-  
+
   // Handlers de reproducción
   const handleNext = () => {
     if (songs.length === 0) return;
-    
+
     let nextIndex;
     if (shuffle) {
       do {
@@ -176,14 +196,14 @@ export const MusicPlayer = () => {
     } else {
       nextIndex = (currentSongIndex + 1) % songs.length;
     }
-    
+
     setCurrentSongIndex(nextIndex);
-    setIsPlaying(false);
+    //setIsPlaying(false); // No se necesita, la carga de la nueva canción ya lo maneja
   };
-  
+
   const handlePrevious = () => {
     if (songs.length === 0) return;
-    
+
     let prevIndex;
     if (shuffle) {
       do {
@@ -192,11 +212,11 @@ export const MusicPlayer = () => {
     } else {
       prevIndex = currentSongIndex === 0 ? songs.length - 1 : currentSongIndex - 1;
     }
-    
+
     setCurrentSongIndex(prevIndex);
-    setIsPlaying(false);
+    //setIsPlaying(false); // No se necesita, la carga de la nueva canción ya lo maneja
   };
-  
+
   const clearPlaylist = () => {
     songs.forEach(song => {
       if (song.url) {
@@ -208,7 +228,7 @@ export const MusicPlayer = () => {
     setIsPlaying(false);
     localStorage.removeItem('musicPlayer_songs');
   };
-  
+
   // Cleanup al desmontar
   useEffect(() => {
     return () => {
@@ -219,9 +239,9 @@ export const MusicPlayer = () => {
       });
     };
   }, []);
-  
+
   const currentSong = songs[currentSongIndex];
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 text-white">
       <div className="container mx-auto px-4 py-8">
@@ -230,7 +250,7 @@ export const MusicPlayer = () => {
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-purple-300 bg-clip-text text-transparent">
             Music Player
           </h1>
-          
+
           {/* Upload Section */}
           <div className="mb-6">
             <input
@@ -250,7 +270,7 @@ export const MusicPlayer = () => {
               {isLoading ? 'Loading...' : 'Upload Songs'}
             </button>
           </div>
-          
+
           {/* Error Messages */}
           {errors.length > 0 && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-4">
@@ -266,7 +286,7 @@ export const MusicPlayer = () => {
             </div>
           )}
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Playlist Component */}
           <div className="lg:col-span-1">
@@ -281,7 +301,7 @@ export const MusicPlayer = () => {
               setSortOrder={setSortOrder}
             />
           </div>
-          
+
           {/* Player Component */}
           <div className="lg:col-span-2">
             <Player 
@@ -298,7 +318,7 @@ export const MusicPlayer = () => {
               audioRef={audioRef}
               setErrors={setErrors}
             />
-            
+
             <PlayingBar 
               currentTime={currentTime}
               duration={duration}
@@ -312,7 +332,7 @@ export const MusicPlayer = () => {
             />
           </div>
         </div>
-        
+
         {/* Hidden Audio Element */}
         {currentSong && (
           <audio
