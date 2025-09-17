@@ -1,85 +1,114 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { Music, Trash2 } from 'lucide-react';
 
 const songStyles = {
-  item: {
+  listItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.75rem',
-    borderRadius: '0.5rem',
+    justifyContent: 'space-between',
+    padding: '0.8rem 1.2rem',
+    borderRadius: '12px',
     cursor: 'pointer',
-    transition: 'all 0.2s',
-    position: 'relative',
-    overflow: 'hidden',
+    marginBottom: '0.6rem',
+    transition: 'background-color 0.3s, transform 0.1s ease',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
-  current: {
-    background: 'linear-gradient(to right, rgba(229, 98, 145, 0.3), rgba(140, 82, 255, 0.3))',
-    border: '1px solid rgba(229, 98, 145, 0.5)',
+  listItemHover: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    transform: 'scale(1.02)',
+  },
+  activeItem: {
+    backgroundColor: 'rgba(120, 0, 190, 0.3)', // Color de acento con opacidad
+    borderLeft: '4px solid #9C27B0', // Borde vibrante
+    transform: 'scale(1.02)',
+  },
+  songInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    flex: '1',
+    overflow: 'hidden',
   },
   thumbnail: {
-    width: '2.5rem',
-    height: '2.5rem',
-    background: 'linear-gradient(to bottom right, #e56291, #8c52ff)',
-    borderRadius: '9999px',
-    flexShrink: '0',
+    width: '40px',
+    height: '40px',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    border: '1px solid rgba(255, 255, 255, 0.1)',
   },
-  info: {
-    flex: '1',
-    minWidth: '0',
+  thumbnailImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: '8px',
+    objectFit: 'cover',
   },
-  name: {
-    fontWeight: '500',
-    whiteSpace: 'nowrap',
+  songIcon: {
+    color: '#9C27B0', // Color de acento para el icono
+  },
+  songDetails: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
-  size: {
-    fontSize: '0.875rem',
-    color: '#a0aec0',
+  songName: {
+    fontWeight: '500',
+    fontSize: '1.1rem',
+    color: '#e0e0e0',
+  },
+  songArtist: {
+    fontSize: '0.9rem',
+    color: '#b0b0b0',
   },
   removeButton: {
-    padding: '0.25rem',
-    borderRadius: '0.25rem',
     background: 'none',
     border: 'none',
-    color: '#f87171',
+    color: '#e0e0e0',
     cursor: 'pointer',
-    opacity: '0',
-    transition: 'opacity 0.2s',
+    opacity: '0.6',
+    transition: 'opacity 0.3s, transform 0.2s',
+  },
+  removeButtonHover: {
+    opacity: '1',
+    color: '#FF4500', // Rojo naranja para la acción de eliminar
+    transform: 'scale(1.1)',
   },
 };
 
-export const Song = ({ song, index, isCurrentSong, onSelect, onRemove }) => {
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
+export const Song = ({ song, index, currentSongIndex, onSelect, onRemove }) => {
   return (
-    <div
-      style={isCurrentSong ? { ...songStyles.item, ...songStyles.current } : songStyles.item}
-      onClick={onSelect}
-      onMouseEnter={(e) => e.currentTarget.querySelector('button').style.opacity = '1'}
-      onMouseLeave={(e) => e.currentTarget.querySelector('button').style.opacity = '0'}
+    <li
+      onClick={() => onSelect(index)}
+      style={{ ...songStyles.listItem, ...(index === currentSongIndex ? songStyles.activeItem : {}) }}
+      onMouseOver={e => { if (index !== currentSongIndex) e.currentTarget.style.backgroundColor = songStyles.listItemHover.backgroundColor; }}
+      onMouseOut={e => { if (index !== currentSongIndex) e.currentTarget.style.backgroundColor = songStyles.listItem.backgroundColor; }}
     >
-      <div style={songStyles.thumbnail}></div>
-      <div style={songStyles.info}>
-        <p style={songStyles.name}>{song.name.replace(/\.[^/.]+$/, "")}</p>
-        <p style={songStyles.size}>{formatFileSize(song.size)}</p>
+      <div style={songStyles.songInfo}>
+        <div style={songStyles.thumbnail}>
+          {song.cover ? (
+            <img src={song.cover} alt="Cover" style={songStyles.thumbnailImage} />
+          ) : (
+            <Music size={20} style={songStyles.songIcon} />
+          )}
+        </div>
+        <div style={songStyles.songDetails}>
+          <div style={songStyles.songName}>{song.title}</div>
+          <div style={songStyles.songArtist}>{song.artist}</div>
+        </div>
       </div>
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
+        onClick={(e) => { e.stopPropagation(); onRemove(index); }}
         style={songStyles.removeButton}
+        onMouseOver={e => { e.currentTarget.style.opacity = songStyles.removeButtonHover.opacity; e.currentTarget.style.color = songStyles.removeButtonHover.color; }}
+        onMouseOut={e => { e.currentTarget.style.opacity = songStyles.removeButton.opacity; e.currentTarget.style.color = songStyles.removeButton.color; }}
       >
-        <X size={16} />
+        <Trash2 size={16} />
       </button>
-    </div>
+    </li>
   );
 };
+
+export default Song;

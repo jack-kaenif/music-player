@@ -1,121 +1,151 @@
 import React from 'react';
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat } from 'lucide-react';
+import { Play, Pause, FastForward, Rewind, Shuffle, Repeat } from 'lucide-react';
 import ShowSong from './ShowSong.jsx';
 
 const playerStyles = {
   container: {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '1.5rem',
-    padding: '2rem',
-    marginBottom: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '2.5rem',
   },
   controls: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: '1.5rem',
-    marginBottom: '1.5rem',
+    gap: '2.5rem',
   },
-  button: {
-    padding: '0.75rem',
-    borderRadius: '0.5rem',
-    transition: 'background-color 0.3s',
-    backgroundColor: 'transparent',
+  mainControls: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '2rem',
+  },
+  controlButton: {
+    background: 'none',
     border: 'none',
-    color: 'white',
+    color: '#e0e0e0',
     cursor: 'pointer',
+    transition: 'color 0.3s, transform 0.2s',
   },
-  mainButton: {
-    padding: '1rem',
+  controlButtonHover: {
+    color: '#fff',
+    transform: 'scale(1.1)',
+  },
+  playPauseButton: {
+    background: 'linear-gradient(to right, #7b1fa2, #9c27b0)', // Degradado de acento
+    color: '#fff',
+    width: '4.5rem',
+    height: '4.5rem',
     borderRadius: '9999px',
-    background: 'linear-gradient(to right, #e56291, #8c52ff)',
-    transition: 'all 0.3s',
-    border: 'none',
-    color: 'white',
-    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 8px 25px rgba(156, 39, 176, 0.4)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   },
-  buttonDisabled: {
-    opacity: '0.5',
+  playPauseButtonHover: {
+    transform: 'scale(1.1)',
+    boxShadow: '0 10px 30px rgba(156, 39, 176, 0.6)',
+  },
+  subControl: {
+    color: '#b0b0b0',
+    transition: 'color 0.3s, transform 0.2s',
+  },
+  subControlActive: {
+    color: '#9C27B0', // Color de acento activo
+    transform: 'scale(1.15)',
+  },
+  subControlHover: {
+    color: '#e0e0e0',
+    transform: 'scale(1.1)',
+  },
+  disabled: {
+    opacity: 0.4,
     cursor: 'not-allowed',
-  },
-  shuffleActive: {
-    backgroundColor: '#e56291',
-    color: 'white',
   },
 };
 
-export const Player = ({ 
-  currentSong, 
-  isPlaying, 
-  setIsPlaying, 
-  songs, 
-  handleNext, 
-  handlePrevious, 
-  shuffle, 
-  setShuffle, 
-  repeat, 
-  setRepeat, 
-  audioRef, 
-  setErrors 
-}) => {
+export const Player = ({ currentSong, isPlaying, setIsPlaying, songs, handleNext, handlePrevious, shuffle, setShuffle, repeat, setRepeat }) => {
   const togglePlayPause = () => {
-    if (!audioRef.current || songs.length === 0) return;
-    setIsPlaying(!isPlaying);
+    if (currentSong) {
+      setIsPlaying(!isPlaying);
+    }
   };
 
   const toggleShuffle = () => {
     setShuffle(!shuffle);
   };
-  
+
   const toggleRepeat = () => {
     setRepeat((prev) => (prev + 1) % 3);
   };
-
+  
   return (
     <div style={playerStyles.container}>
       <ShowSong currentSong={currentSong} />
-      
       <div style={playerStyles.controls}>
         <button
           onClick={toggleShuffle}
-          style={{ ...playerStyles.button, ...(shuffle && playerStyles.shuffleActive) }}
-          title="Shuffle"
-        >
-          <Shuffle size={20} />
-        </button>
-        
-        <button
-          onClick={handlePrevious}
           disabled={songs.length === 0}
-          style={{ ...playerStyles.button, ...(songs.length === 0 && playerStyles.buttonDisabled) }}
+          style={{ 
+            ...playerStyles.controlButton, 
+            ...playerStyles.subControl, 
+            ...(shuffle ? playerStyles.subControlActive : {}),
+            ...(songs.length === 0 ? playerStyles.disabled : {}),
+          }}
+          onMouseOver={e => { if (songs.length > 0) e.currentTarget.style.color = playerStyles.subControlHover.color; }}
+          onMouseOut={e => { if (songs.length > 0 && !shuffle) e.currentTarget.style.color = playerStyles.subControl.color; if (songs.length > 0 && shuffle) e.currentTarget.style.color = playerStyles.subControlActive.color; }}
         >
-          <SkipBack size={24} />
+          <Shuffle size={24} />
         </button>
-        
-        <button
-          onClick={togglePlayPause}
-          disabled={songs.length === 0}
-          style={{ ...playerStyles.mainButton, ...(songs.length === 0 && playerStyles.buttonDisabled) }}
-        >
-          {isPlaying ? <Pause size={28} /> : <Play size={28} />}
-        </button>
-        
-        <button
-          onClick={handleNext}
-          disabled={songs.length === 0}
-          style={{ ...playerStyles.button, ...(songs.length === 0 && playerStyles.buttonDisabled) }}
-        >
-          <SkipForward size={24} />
-        </button>
-        
+        <div style={playerStyles.mainControls}>
+          <button 
+            onClick={handlePrevious} 
+            disabled={!currentSong} 
+            style={{ 
+              ...playerStyles.controlButton, 
+              ...(!currentSong ? playerStyles.disabled : {}),
+            }}
+            onMouseOver={e => { if (currentSong) e.currentTarget.style.color = playerStyles.controlButtonHover.color; }}
+            onMouseOut={e => { if (currentSong) e.currentTarget.style.color = playerStyles.controlButton.color; }}
+          >
+            <Rewind size={32} />
+          </button>
+          <button 
+            onClick={togglePlayPause} 
+            disabled={!currentSong} 
+            style={{ ...playerStyles.playPauseButton, ...(!currentSong ? playerStyles.disabled : {}) }}
+            onMouseOver={e => { if (currentSong) e.currentTarget.style.transform = playerStyles.playPauseButtonHover.transform; e.currentTarget.style.boxShadow = playerStyles.playPauseButtonHover.boxShadow; }}
+            onMouseOut={e => { if (currentSong) e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = playerStyles.playPauseButton.boxShadow; }}
+          >
+            {isPlaying ? <Pause size={36} fill="white" /> : <Play size={36} fill="white" />}
+          </button>
+          <button 
+            onClick={handleNext} 
+            disabled={!currentSong} 
+            style={{ 
+              ...playerStyles.controlButton, 
+              ...(!currentSong ? playerStyles.disabled : {}),
+            }}
+            onMouseOver={e => { if (currentSong) e.currentTarget.style.color = playerStyles.controlButtonHover.color; }}
+            onMouseOut={e => { if (currentSong) e.currentTarget.style.color = playerStyles.controlButton.color; }}
+          >
+            <FastForward size={32} />
+          </button>
+        </div>
         <button
           onClick={toggleRepeat}
-          style={{ ...playerStyles.button, ...(repeat > 0 && playerStyles.shuffleActive) }}
-          title={repeat === 0 ? 'No repeat' : repeat === 1 ? 'Repeat one' : 'Repeat all'}
+          disabled={songs.length === 0}
+          style={{ 
+            ...playerStyles.controlButton, 
+            ...playerStyles.subControl, 
+            ...(repeat > 0 ? playerStyles.subControlActive : {}),
+            ...(songs.length === 0 ? playerStyles.disabled : {}),
+          }}
+          onMouseOver={e => { if (songs.length > 0) e.currentTarget.style.color = playerStyles.subControlHover.color; }}
+          onMouseOut={e => { if (songs.length > 0 && repeat === 0) e.currentTarget.style.color = playerStyles.subControl.color; if (songs.length > 0 && repeat > 0) e.currentTarget.style.color = playerStyles.subControlActive.color; }}
         >
-          <Repeat size={20} />
-          {repeat === 1 && <span style={{ fontSize: '0.75rem', position: 'absolute', top: '-0.5rem', right: '-0.5rem' }}>1</span>}
+          <Repeat size={24} />
+          {repeat === 1 && <span style={{ fontSize: '0.8rem', position: 'absolute', transform: 'translate(10px, -10px)', fontWeight: 'bold' }}>1</span>}
         </button>
       </div>
     </div>

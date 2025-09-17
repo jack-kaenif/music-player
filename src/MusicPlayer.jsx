@@ -8,18 +8,18 @@ import * as mm from 'music-metadata-browser';
 const musicPlayerStyles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(to bottom right, #2b0c41, #360a3a)',
-    color: '#fff',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     padding: '2rem 1rem',
+    background: 'radial-gradient(circle at top left, #2a003a, #11001a)',
+    color: '#e0e0e0',
+    fontFamily: '"Inter", sans-serif',
   },
   mainContent: {
     width: '100%',
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
   },
   header: {
@@ -27,12 +27,11 @@ const musicPlayerStyles = {
     marginBottom: '2rem',
   },
   title: {
-    fontSize: '2.5rem',
-    fontWeight: 'bold',
+    fontSize: '2.8rem',
+    fontWeight: '700',
     marginBottom: '1rem',
-    backgroundImage: 'linear-gradient(to right, #e56291, #8c52ff)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: '#e0e0e0',
+    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
   },
   uploadSection: {
     marginBottom: '1.5rem',
@@ -40,37 +39,45 @@ const musicPlayerStyles = {
   uploadButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
+    gap: '0.75rem',
     margin: '0 auto',
-    padding: '0.75rem 1.5rem',
-    borderRadius: '9999px',
+    padding: '0.9rem 2rem',
+    borderRadius: '12px',
     fontWeight: '600',
-    backgroundImage: 'linear-gradient(to right, #e56291, #8c52ff)',
-    transition: 'all 0.3s ease',
-    border: 'none',
+    background: 'linear-gradient(to right, #6a1b9a, #4a148c)',
     color: '#fff',
+    border: 'none',
     cursor: 'pointer',
-    opacity: 1,
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+  },
+  buttonHover: {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.4)',
   },
   buttonDisabled: {
     opacity: 0.5,
     cursor: 'not-allowed',
+    boxShadow: 'none',
   },
   errorBox: {
-    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-    border: '1px solid rgba(239, 68, 68, 0.5)',
-    borderRadius: '0.5rem',
+    backgroundColor: 'rgba(255, 69, 0, 0.15)',
+    border: '1px solid rgba(255, 69, 0, 0.5)',
+    borderRadius: '10px',
     padding: '1rem',
-    marginBottom: '1rem',
+    marginBottom: '1.5rem',
+    color: '#ff8c00',
+    fontSize: '0.9rem',
+    backdropFilter: 'blur(5px)',
   },
   errorText: {
-    color: '#fca5a5',
+    color: '#ff8c00',
     fontSize: '0.875rem',
   },
   errorButton: {
     background: 'none',
     border: 'none',
-    color: '#fca5a5',
+    color: '#ff8c00',
     cursor: 'pointer',
     fontSize: '0.75rem',
     marginTop: '0.5rem',
@@ -79,13 +86,21 @@ const musicPlayerStyles = {
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gap: '2rem',
+    gap: '2.5rem',
+  },
+  playerContainer: {
+    backgroundColor: 'rgba(20, 0, 30, 0.6)',
+    borderRadius: '18px',
+    padding: '2.5rem',
+    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
   },
 };
 
 const mediaQueryLg = '@media (min-width: 1024px)';
 musicPlayerStyles.grid[mediaQueryLg] = {
-  gridTemplateColumns: 'repeat(3, 1fr)',
+  gridTemplateColumns: '350px 1fr', // Ancho fijo para la playlist, el resto para el reproductor
 };
 
 export const MusicPlayer = () => {
@@ -169,7 +184,6 @@ export const MusicPlayer = () => {
           let cover = null;
           if (common.picture && common.picture.length > 0) {
             const picture = common.picture[0];
-            // Convertir Uint8Array a Base64 de forma nativa en el navegador
             const base64String = btoa(
               String.fromCharCode(...new Uint8Array(picture.data))
             );
@@ -363,7 +377,7 @@ export const MusicPlayer = () => {
               setSortOrder={setSortOrder}
             />
           </div>
-          <div style={{ '@media (min-width: 1024px)': { gridColumn: 'span 2' } }}>
+          <div style={{ ...musicPlayerStyles.playerContainer, '@media (min-width: 1024px)': { gridColumn: 'span 1' } }}>
             <Player 
               currentSong={currentSong}
               isPlaying={isPlaying}
