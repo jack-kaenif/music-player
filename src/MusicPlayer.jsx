@@ -3,6 +3,7 @@ import { Playlist } from './Components/Playlist.jsx';
 import { Player } from './Components/Player.jsx'; 
 import { PlayingBar } from './Components/PlayingBar.jsx';
 import { Upload } from 'lucide-react';
+import * as mm from 'music-metadata-browser';
 
 const musicPlayerStyles = {
   container: {
@@ -162,24 +163,42 @@ export const MusicPlayer = () => {
       if (validateAudioFile(file)) {
         const url = URL.createObjectURL(file);
         
-        let artist = 'Unknown Artist';
-        let title = file.name.replace(/\.[^/.]+$/, "");
-        const parts = file.name.split(' - ');
-        
-        if (parts.length > 1) {
-            artist = parts[0];
-            title = parts.slice(1).join(' - ').replace(/\.[^/.]+$/, "");
+        try {
+          const { common } = await mm.parseBlob(file);
+          
+          let cover = null;
+          if (common.picture && common.picture.length > 0) {
+            const picture = common.picture[0];
+            // Convertir Uint8Array a Base64 de forma nativa en el navegador
+            const base64String = btoa(
+              String.fromCharCode(...new Uint8Array(picture.data))
+            );
+            cover = `data:${picture.format};base64,${base64String}`;
+          }
+          
+          newSongs.push({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            url: url,
+            file: file,
+            artist: common.artist || 'Unknown Artist',
+            title: common.title || file.name.replace(/\.[^/.]+$/, ""),
+            cover: cover
+          });
+        } catch (error) {
+          console.error('Error reading tags:', error);
+          newSongs.push({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            url: url,
+            file: file,
+            artist: 'Unknown Artist',
+            title: file.name.replace(/\.[^/.]+$/, ""),
+            cover: null
+          });
         }
-
-        newSongs.push({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: url,
-          file: file,
-          artist: artist,
-          title: title
-        });
       } else {
         invalidFiles.push(file.name);
       }
@@ -230,14 +249,12 @@ export const MusicPlayer = () => {
       audio.src = newSong.url;
       audio.load();
     }
-    // Lógica nueva: Si el reproductor estaba en estado de "reproduciendo"
-    // al cambiar de canción, la nueva debe iniciar automáticamente.
     if (isPlaying) {
       audio.play().catch(error => {
         setErrors(prev => [...prev, 'Error playing audio: ' + error.message]);
       });
     }
-  }, [currentSongIndex, songs]); // Agrega `isPlaying` a las dependencias si quieres que se dispare al cambiar de estado también.
+  }, [currentSongIndex, songs]);
 
   useEffect(() => {
     const audio = audioRef.current;

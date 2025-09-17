@@ -13,6 +13,9 @@ const showSongStyles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundColor: '#4a5568', // Fallback color
   },
   noSongArtwork: {
     width: '12rem',
@@ -43,15 +46,19 @@ const showSongStyles = {
 };
 
 export const ShowSong = ({ currentSong }) => {
+  const artworkStyle = currentSong && currentSong.cover ? 
+    { ...showSongStyles.artwork, backgroundImage: `url(${currentSong.cover})` } : 
+    showSongStyles.artwork;
+    
   return (
     <div style={showSongStyles.container}>
       {currentSong ? (
         <>
-          <div style={showSongStyles.artwork}>
-            <div style={showSongStyles.innerCircle}></div>
+          <div style={artworkStyle}>
+            {!currentSong.cover && <div style={showSongStyles.innerCircle}></div>}
           </div>
-          <h2 style={showSongStyles.title}>{currentSong.name.replace(/\.[^/.]+$/, "")}</h2>
-          <p style={showSongStyles.artist}>Unknown Artist</p>
+          <h2 style={showSongStyles.title}>{currentSong.title}</h2>
+          <p style={showSongStyles.artist}>{currentSong.artist}</p>
         </>
       ) : (
         <>
