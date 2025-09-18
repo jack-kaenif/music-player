@@ -1,5 +1,11 @@
 import React from "react";
-import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  Popsicle,
+  MoveLeft,
+} from "lucide-react";
 import { Song } from "./Song.jsx";
 
 const playlistStyles = {
@@ -10,6 +16,11 @@ const playlistStyles = {
     boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
     backdropFilter: "blur(10px)",
     border: "1px solid rgba(255, 255, 255, 0.05)",
+    position: "absolute",
+    top: "6rem",
+    left: "0",
+    width: "25vw",
+    height: "75vh",
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",

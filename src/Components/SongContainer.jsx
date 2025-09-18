@@ -1,27 +1,27 @@
-import React from 'react';
-import { Song } from './Song.jsx';
+import React from "react";
+import { Song } from "./Song.jsx";
 
 const songContainerStyles = {
   container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-    maxHeight: '24rem',
-    overflowY: 'auto',
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    maxHeight: "24rem",
+    overflowY: "auto",
   },
 };
 
-export const SongContainer = ({ 
-  songs, 
-  setSongs, 
-  currentSongIndex, 
-  setCurrentSongIndex, 
-  setIsPlaying 
+export const SongContainer = ({
+  songs,
+  setSongs,
+  currentSongIndex,
+  setCurrentSongIndex,
+  setIsPlaying,
 }) => {
   const selectSong = (index) => {
     setCurrentSongIndex(index);
   };
-  
+
   const removeSong = (index) => {
     const songToRemove = songs[index];
     if (songToRemove.url) {
@@ -42,7 +42,7 @@ export const SongContainer = ({
   return (
     <div style={songContainerStyles.container}>
       {songs.map((song, index) => (
-        <Song 
+        <Song
           key={index}
           song={song}
           index={index}

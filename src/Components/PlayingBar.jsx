@@ -44,10 +44,14 @@ const playingBarStyles = {
   },
   volumeContainer: {
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
     gap: "1.2rem",
     width: "100%",
     justifyContent: "center",
+    position: "relative",
+    top: "-10.5vw",
+    left: "25vw",
   },
   volumeIcon: {
     color: "#b0b0b0",
@@ -68,6 +72,7 @@ const playingBarStyles = {
     outline: "none",
     cursor: "pointer",
     transition: "background 0.3s",
+    transform: "rotate(-90deg)",
   },
   volumeSliderThumb: {
     WebkitAppearance: "none",
@@ -173,6 +178,15 @@ export const PlayingBar = ({
         </span>
       </div>
       <div style={playingBarStyles.volumeContainer}>
+        <input
+          ref={volumeInputRef}
+          type="range"
+          min="0"
+          max="100"
+          value={volume}
+          onChange={handleVolumeChange}
+          style={playingBarStyles.volumeSlider}
+        />
         <button
           onClick={handleMute}
           style={{
@@ -194,15 +208,6 @@ export const PlayingBar = ({
             <Volume2 size={20} />
           )}
         </button>
-        <input
-          ref={volumeInputRef}
-          type="range"
-          min="0"
-          max="100"
-          value={volume}
-          onChange={handleVolumeChange}
-          style={playingBarStyles.volumeSlider}
-        />
       </div>
     </div>
   );

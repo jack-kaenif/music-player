@@ -26,11 +26,14 @@ const musicPlayerStyles = {
     marginBottom: "2rem",
   },
   title: {
-    fontSize: "2.8rem",
+    fontSize: "2.2rem",
     fontWeight: "700",
     marginBottom: "1rem",
     color: "#e0e0e0",
     textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+    position: "absolute",
+    right: "28vw",
+    top: "0",
   },
   uploadSection: {
     marginBottom: "1.5rem",
@@ -49,6 +52,10 @@ const musicPlayerStyles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
+    position: "absolute",
+    left: "1.5rem",
+    top: "1.5rem",
+    width: "25vw",
   },
   buttonHover: {
     transform: "translateY(-2px)",
@@ -94,12 +101,12 @@ const musicPlayerStyles = {
     boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
     backdropFilter: "blur(10px)",
     border: "1px solid rgba(255, 255, 255, 0.05)",
+    position: "fixed",
+    top: "6rem",
+    right: "0",
+    width: "64vw",
+    height: "75vh",
   },
-};
-
-const mediaQueryLg = "@media (min-width: 1024px)";
-musicPlayerStyles.grid[mediaQueryLg] = {
-  gridTemplateColumns: "350px 1fr", // Ancho fijo para la playlist, el resto para el reproductor
 };
 
 export const MusicPlayer = () => {
