@@ -13,7 +13,7 @@ const showSongStyles = {
     boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundColor: '#300040', // Fallback color
+    backgroundColor: '#300040',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -77,10 +77,10 @@ export const ShowSong = ({ currentSong }) => {
       ) : (
         <>
           <div style={showSongStyles.noSongArtwork}>
-            <span style={showSongStyles.noSongText}>No Song</span>
+            <span style={showSongStyles.noSongText}>No hay canción</span>
           </div>
-          <h2 style={showSongStyles.title}>Nothing is playing</h2>
-          <p style={showSongStyles.artist}>Upload files to start listening</p>
+          <h2 style={showSongStyles.title}>Nada se está reproduciendo</h2>
+          <p style={showSongStyles.artist}>Sube archivos para empezar a reproducir</p>
         </>
       )}
     </div>

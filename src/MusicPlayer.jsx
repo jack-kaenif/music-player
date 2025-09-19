@@ -291,7 +291,7 @@ export const MusicPlayer = () => {
     }
     if (isPlaying) {
       audio.play().catch((error) => {
-        setErrors((prev) => [...prev, "Error playing audio: " + error.message]);
+        setErrors((prev) => [...prev, "Error reproduciendo audio: " + error.message]);
       });
     }
   }, [currentSongIndex, songs]);
@@ -301,7 +301,7 @@ export const MusicPlayer = () => {
     if (!audio) return;
     if (isPlaying) {
       audio.play().catch((error) => {
-        setErrors((prev) => [...prev, "Error playing audio: " + error.message]);
+        setErrors((prev) => [...prev, "Error reproduciendo audio: " + error.message]);
       });
     } else {
       audio.pause();
@@ -333,7 +333,7 @@ export const MusicPlayer = () => {
     audio.addEventListener("loadedmetadata", updateDuration);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("error", (e) => {
-      setErrors((prev) => [...prev, `Error playing song: ${e.message}`]);
+      setErrors((prev) => [...prev, `Error reproduciendo canción: ${e.message}`]);
       setIsPlaying(false);
     });
     return () => {
@@ -383,7 +383,7 @@ export const MusicPlayer = () => {
               }
             >
               <Upload size={20} />
-              {isLoading ? "Loading..." : "Upload Songs"}
+              {isLoading ? "Cargando..." : "Subir canciones"}
             </button>
           </div>
           {errors.length > 0 && (

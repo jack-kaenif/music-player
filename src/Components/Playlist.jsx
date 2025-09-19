@@ -154,7 +154,7 @@ export const Playlist = ({
                 playlistStyles.sortButton.background)
             }
           >
-            Sort by Title{" "}
+            Filtrar por titulo..{" "}
             {sortOrder.startsWith("title") &&
               (sortOrder.endsWith("asc") ? (
                 <ChevronUp size={16} />
@@ -194,7 +194,7 @@ export const Playlist = ({
         </ul>
       ) : (
         <div style={playlistStyles.emptyState}>
-          <p>Your playlist is empty. Upload some songs!</p>
+          <p>Tu playlist está vacia, sube algunas!</p>
         </div>
       )}
     </div>

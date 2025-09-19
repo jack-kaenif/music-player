@@ -58,7 +58,7 @@ const playerStyles = {
     transition: "color 0.3s, transform 0.2s",
   },
   subControlActive: {
-    color: "#9C27B0", // Color de acento activo
+    color: "#9C27B0",
     transform: "scale(1.15)",
   },
   subControlHover: {
